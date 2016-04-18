@@ -1,0 +1,10 @@
+# no itermediate TeX files
+*.aux
+*.bib
+*.bbl
+*.blg
+*.log
+*.out
+*.pdf
+*.xml
+*.synctex
