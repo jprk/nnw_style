@@ -1,0 +1,164 @@
+%% --------------------------------------------------------------------------
+%% Compile with (PDF mode)
+%%   pdflatex bibsample
+%%   biber bibsample
+%%   pdflatex bibsample
+%%   pdflatex bibsample
+%% or (DVI mode)
+%%   latex bibsample
+%%   biber bibsample
+%%   latex bibsample
+%%   latex bibsample
+%% --------------------------------------------------------------------------
+\documentclass[twoside]{nnw}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage[english]{babel}
+%% Conditional support for PDF and DVI mode
+\usepackage{ifpdf}
+\ifpdf
+  %% Needed for colouring links in PDF mode
+  \usepackage{xcolor}
+  \definecolor{cvutbase}{RGB}{0,99,168}
+  \definecolor{cvutgreen}{RGB}{0,168,99}
+  %% Can be used for electronic version
+  \usepackage[pdftex,colorlinks=true,breaklinks=true,linkcolor=cvutbase,urlcolor=blue,citecolor=cvutgreen,plainpages=false]{hyperref}
+\else
+  %% B&W in DVI mode
+  %% The unfortunate side effect of using DVI output is the lack of proper support
+  %% for beaking long links (url, doi)
+  \usepackage[dvips,colorlinks=true,breaklinks=true,linkcolor=black,urlcolor=black,citecolor=black]{hyperref}
+  %% \nolinkurl is ignored by breakurl package, use a hack
+  \def\nolinkurl#1{\url{#1}}
+  %% This is needed in DVI->PS mode to break links
+  %% \usepackage[anythingbreaks]{breakurl}
+  \usepackage{breakurl}
+\fi
+%% BibTeX is hopelessly outdated to provide sensible rules for ISO690, and UTF-8
+%% Hence, we depend on 'biblatex' package and 'biber' for .bib database processing
+%% so instead of calling 'bibtex <file>' use 'biber <file>'
+%% Biber part starts here
+%\usepackage[
+%    backend=biber,
+%    sorting=nty,
+%    useprefix=true,
+%    style=nnw
+%]{biblatex}
+%% Biber part ends here
+%% In the case of emergency you may still try to use BibTeX, but the result will probably
+%% not be what you want. Biblatex will definitely complain that BibTeX is not UTF-8
+%% capable and that some fields have different format (note that biblatex .bib format
+%% uses and is able to parse more fields than bibtex .bib).
+%% BibTeX part starts here
+\usepackage[
+    backend=bibtex,
+    sorting=nty,
+    useprefix=true,
+    style=nnw
+]{biblatex}
+%% BibTeX part ends here
+\renewcommand*{\bibfont}{\small}
+\addbibresource{bibsample.bib}
+
+\newcommand{\omath}[1]{%
+  \ensuremath{#1}%
+  \ifmmode \relax \else \xspace \fi%
+}
+\newcommand{\bi}[1]{\omath{\mathbf{#1}}}
+\newcommand{\bs}[1]{\omath{\pmb{#1}}}
+\newcommand{\tc}{\omath{T_\mathrm{C}}}
+\newcommand{\tck}{\omath{T_{\mathrm{C},k}}}
+\newcommand{\tz}{\omath{T_\mathrm{g}}}
+\newcommand{\tzk}{\omath{T_{\mathrm{g},k}}}
+\newcommand{\rpk}{\omath{R_{\mathrm{P},k}}}
+\newcommand{\xak}{\omath{X_{\mathrm{a},k}}}
+\newcommand{\kb}{\omath{a_{\mathrm{B},k}}}
+\newcommand{\td}{\omath{T_\Delta}}
+\newcommand{\doi}[1]{doi:~\href{http://dx.doi.org/#1}{\nolinkurl{#1}}}
+
+% Provide citation commands used in natbib format
+\makeatletter
+\def\citep{\@ifnextchar[{\@with}{\@without}}
+\def\citet{\@ifnextchar[{\@with}{\@without}}
+\def\@with[#1]#2{\cite[#1]{#2}}
+\def\@without#1{\cite{#1}}
+\makeatother
+
+\pagestyle{myheadings}
+\setcounter{page}{1}
+\markboth{Neural Network World ?/15, ??}{Přikryl, Kocijan: Modelling Occupancy-Queue Relation}
+
+%\renewcommand{\baselinestretch}{2}
+
+\begin{document}
+
+\title{Modelling Occupancy-Queue Relation using Gaussian Process}
+
+\author{%
+    Jan Přikryl\thanks{Jan Přikryl -- Corresponding author, Czech Technical University in Prague, Faculty of Transportation Sciences, and Department of Adaptive Systems, Institute of Information Theory and Automation of the ASCR, Prague, Czech Republic. Email: \texttt{prikryl@fd.cvut.cz}}
+    %
+    and
+    %
+    Juš Kocijan\thanks{Juš Kocijan, Jozef Stefan Institute, Ljubljana and University of Nova Gorica, Slovenia}%
+}
+
+\maketitle
+
+\begin{abstract}
+%
+One of the key indicators of the quality of service for urban transportation
+control (UTC) systems is the queue length. Even in unsaturated conditions,
+longer queues indicate longer travel delays and higher fuel consumption.
+With the exception of some expensive surveillance equipment, the queue length
+itself cannot be measured automatically, and manual measurement is both
+impractical and costly in a long term scenario. Hence, many mathematical models
+that express the queue length as a function of detector measurements are used
+in engineering practice, ranging from simple to elaborate ones.  The method
+proposed in this paper makes use of detector time-occupancy, a complementary
+quantity to vehicle count, provided by most of the traffic detectors at no cost
+and disregarded by majority of existing approaches for various reasons. Our model
+is designed as a complement to existing methods. It is based on Gaussian-process
+(GP)~model of the occupancy-queue relationship, it can handle data uncertainties,
+and it provides more information about the quality of the queue length prediction.
+%
+\end{abstract}
+
+\key{queue estimation; uncertainty; traffic model; Gaussian process}
+
+\rec{August 28, 2014} \hfill  \textbf{DOI:} 10.14311/NNW.2015.25.00?
+\rev{February 3, 2015}
+
+
+% ========================================================================
+%                                                             INTRODUCTION
+% ========================================================================
+\section{Introduction}
+
+Queue length has been regarded as one of the key parameters in the process of signal plan design, as estimates of queue length may be used as a part of a criterion that is minimised by urban traffic control (UTC) systems that provide coordinated control of signalised intersections.
+
+The main difficulty of using the queue-length as a part of performance criterion is the fact that the length is difficult to measure automatically -- the automatic systems are based exclusively on image processing \citep{yang2011robust,zheng2013measuring}.
+
+Numerous studies discuss the problem of modelling the queue development, see for example \citet{friedrich03,mystkowski98,zuylen06,viloria00}. Typical queueing models are for example those of Akçelik \cite{akcelik80}, Hensher \cite{hensher00}, or Mück \cite{mueck02}. The American Highway Capacity Manual 2000 uses a modified version of Akçelik's model \cite{hcm2000}.  These models are derived from underlying physical principles of the queue formation and dissipation processes and include some ad-hoc corrections accounting for the stochastic nature of the queuing process.
+
+Stochastic properties of queue development are directly taken into account by Markov chain models
+%\citep{zuylen03,zuylen06,viti09a,viti09b}.
+\cite{zuylen06,zuylen03,viti09a,viti2009dynamics}.
+This class of models describes queueing as a stochastic process with probabilities of queue change being given by probability distributions.
+
+The third class of models found in literature are black-box models trying to predict the queue length based on known ``training'' data. These include autoregressive models \citep{ho94}, neural networks \citep{chang95,ledoux97}, combination of neural networks and fuzzy logic \citep{quek06}, genetic algorithms \citep{girianna2004using}, or neural network constructed with the help of genetic algorithms \citep{vlahogianni05}.
+
+All the models mentioned above compute queue length from vehicle count provided by upstream detectors. With the exception of \cite{diakaki99b} and publications of \cite{papageorgiou08a}
+and \cite{vigos08a} (which all concentrate on estimating the total number of vehicles) and \cite{ma2012method} (which estimates the queue tail position by dense sampling the output signal of a detector loop, reading out the lengths of active pulses), detector time-occupancy is not used to provide additional information about the queue formation process, although this quantity is usually provided together with the vehicle count by an intersection controller.
+
+In our opinion, the reason for disregarding time-occupancy information can be twofold: First, pure time-occupancy gives us a reasonable measure of queue length only for limited range of queue tails. If the distance from the detector to the downstream queue tail is high, the
+time-occupancy stays low regardless of the queue length. If the queue tail reaches upstream far behind the detector, the time-occupancy will be high regardless of the queue length. Second,
+the occupancy readings from the detector may be influenced by other parameters of the traffic flow, as inter-vehicle gaps, vehicle speeds, and their length.
+
+Several papers appeared that try to make use of the time-occupancy measurements for providing additional information about the traffic state at an approach to a signalised intersection.
+Authors of \citet{chang00} combine vehicle count and time-occupancy measurements with known signal state and a model of vehicle dynamics to estimate the queue length. Another approach has been taken in \cite{papageorgiou08a}, where the authors start with thorough theoretical analysis of the time-occupancy measurements and follow with a Kalman filter implementation of vehicle count estimator in the follow-up paper \citep{vigos08a}. In our publication \citep{prikryl09} we presented an empirical time-occupancy based queue-length model which combines two separate Gaussian-process (GP) models for the low and high occupancy ranges.
+
+In this paper we present an empirical approach to queue length estimation from time-occupancy data, that is meant as a complement of the existing methods and that is able to provide estimation of queue length in the vicinity of a loop detector based on sparse occupancy measurements.
+
+\printbibliography
+
+\end{document}
